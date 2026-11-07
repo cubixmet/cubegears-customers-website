@@ -84,3 +84,73 @@
   .demo-banner-content a{font-size:14px}
   .demo-hero-action{width:100%}
 }
+
+
+/* Part 16: real invoice balances and on-demand customer session refresh. */
+.stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+.stat{min-width:0}
+.stat .stat-money{font-size:clamp(16px,2vw,26px);overflow-wrap:anywhere}
+.portal-refresh{display:flex;justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:13px;margin:-12px 0 19px;color:#66838a;font-size:12px}
+.portal-refresh .btn{min-height:44px}
+.portal-refresh .btn:disabled{opacity:.65;cursor:not-allowed;transform:none}
+.portal-refresh-error{color:#a42525;background:#fff5f5;border:1px solid #f2d1d1;border-radius:10px;padding:10px 13px;margin-bottom:14px}
+.document{align-items:center}
+.document>div{min-width:0}
+.document small{line-height:1.5}
+.portal-balance-summary{margin-top:20px;border:1px solid #d9e8e4;background:#f7fbf9;border-radius:15px;padding:16px}
+.portal-balance-summary h3{margin:0 0 14px;font-size:15px}
+.portal-balance-summary>div{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:8px 0;color:#4a6970;font-size:13px}
+.portal-balance-summary strong{font-size:14px;color:#20464a;font-variant-numeric:tabular-nums}
+.portal-balance-summary .portal-due{border-top:1px solid #d4e5df;margin-top:8px;padding-top:14px;font-weight:750}
+.portal-balance-summary .portal-due strong{font-size:17px}
+.portal-balance-summary p{font-size:11px;line-height:1.55;color:#6b8386;margin:12px 0 0}
+@media(max-width:920px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:630px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stat{padding:13px}.stat .stat-money{font-size:17px}.portal-refresh{justify-content:space-between;margin-top:-9px}.portal-refresh .btn{font-size:13px;padding:10px}}
+
+/* Part 17 — clearly scoped customer quote decisions; no payment input. */
+.portal-document{align-items:flex-start;flex-wrap:wrap}
+.portal-document>div{flex:1 1 180px}
+.portal-estimate-actions{margin-top:13px;display:flex;flex-wrap:wrap;align-items:center;gap:9px}
+.portal-estimate-actions p{flex-basis:100%;font-size:12px;line-height:1.6;color:#48696d;margin:0 0 3px}
+.portal-estimate-actions .btn{min-height:44px;font-size:13px}
+.portal-estimate-actions .btn:disabled{opacity:.58;cursor:not-allowed}
+.portal-estimate-success{color:#155f4d;background:#edf9f1;border:1px solid #b7e3c9;border-radius:10px;padding:11px 13px}
+@media(max-width:630px){.portal-estimate-actions .btn{flex:1 1 100%;justify-content:center}}
+
+/* Part 18: transparent customer quote lines and persistent decision records. */
+.portal-quote-breakdown{margin:15px 0 12px;border:1px solid #d8e7e4;background:#fbfefd;border-radius:14px;padding:14px}
+.portal-quote-breakdown h4{margin:0 0 12px;font-size:15px;font-weight:700;color:#20464a}
+.portal-quote-table-wrap{overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch}
+.portal-quote-table{width:100%;min-width:365px;border-collapse:collapse;text-align:left;font-variant-numeric:tabular-nums}
+.portal-quote-table th,.portal-quote-table td{padding:10px 7px;border-bottom:1px solid #e1eeeb;font-size:12px;vertical-align:top}
+.portal-quote-table th{font-weight:700;color:#48696d;white-space:nowrap}
+.portal-quote-table td:not(:first-child),.portal-quote-table th:not(:first-child){text-align:right;white-space:nowrap}
+.portal-quote-table td:first-child{min-width:140px;white-space:normal}
+.portal-quote-table td strong{font-size:13px;color:#24494b}
+.portal-quote-table td small{display:block;font-size:11px;color:#68858a;margin-top:4px;line-height:1.45}
+.portal-quote-totals{margin:10px 0 4px;display:grid;gap:1px}
+.portal-quote-totals>div{display:flex;justify-content:space-between;gap:12px;padding:7px 3px;font-size:12px;color:#55767a}
+.portal-quote-totals dt{font-weight:550}
+.portal-quote-totals dd{margin:0;font-weight:700;font-variant-numeric:tabular-nums;color:#22484a;white-space:nowrap}
+.portal-quote-totals .portal-quote-total{border-top:1px solid #bddad2;padding-top:12px;margin-top:4px;font-size:15px}
+.portal-quote-confirm{display:flex;align-items:flex-start;gap:11px;margin:14px 0 0;padding:12px;border:1px solid #bddbd2;border-radius:10px;background:#f1faf6;cursor:pointer;font-weight:550;font-size:13px;line-height:1.5;color:#215c4d}
+.portal-quote-confirm input{flex:none;width:20px;height:20px;margin:0;accent-color:#116f69}
+.portal-quote-confirm:focus-within{outline:2px solid #116f69;outline-offset:2px}
+.portal-quote-unavailable{padding:11px 13px;margin:12px 0;border-radius:9px;background:#fff7e9;color:#8a570d;font-size:12px;line-height:1.5}
+.portal-quote-receipt{display:grid;gap:6px;margin:12px 0;padding:12px;border:1px solid #c8e6db;border-radius:10px;background:#f2fbf7;font-size:12px;color:#26624e;overflow-wrap:anywhere}
+.portal-quote-receipt strong{font-size:13px}
+@media(max-width:630px){.portal-quote-breakdown{padding:11px}.portal-quote-table th,.portal-quote-table td{padding:9px 5px}.portal-quote-confirm{font-size:12px}}
+
+/* Part 20 — accessible customer estimate decline / revision request form */
+.portal-decline-form{flex:1 1 100%;width:100%;padding:14px;border:1px solid #b8d7cf;border-radius:12px;background:#f7fcfa;display:grid;gap:12px}
+.portal-decline-form h4{margin:0;font-size:15px;color:#204a43}
+.portal-decline-form p{margin:0;line-height:1.5;font-size:12px;color:#516c68}
+.portal-decline-form label{display:grid;gap:7px;font-size:13px;font-weight:600;color:#284f49}
+.portal-decline-form select,.portal-decline-form textarea{display:block;min-height:44px;width:100%;box-sizing:border-box;outline-offset:2px;border:1px solid #bbd7d0;border-radius:9px;background:#fff;color:#183f3a;padding:10px 12px;font:inherit;font-weight:400;font-size:14px}
+.portal-decline-form textarea{resize:vertical;min-height:92px;line-height:1.5}
+.portal-decline-form small{text-align:right;color:#657d77}
+.portal-decline-form-buttons{display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap}
+.portal-decline-form-buttons .btn{min-height:44px}
+.portal-decline-receipt{margin-top:6px;padding-top:8px;border-top:1px solid #b9ded0;display:grid;gap:5px}
+.portal-decline-receipt p{font-size:12px;margin:0;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:630px){.portal-decline-form{padding:12px}.portal-decline-form-buttons .btn{flex:1 1 100%;justify-content:center}}

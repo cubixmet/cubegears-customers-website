@@ -28,6 +28,13 @@ export const portalApi = {
   session: () => call('/session'),
   exchange: token => call('/session','POST',{token}),
   logout: () => call('/logout','POST',{}),
+  decideEstimate: (id, version, decision, reviewHash, feedback = {}) => call(
+    '/estimates/' + encodeURIComponent(id) + '/decision', 'POST',
+    {version, decision, reviewHash,
+      ...(decision === 'decline'
+        ? { declineReason: feedback.declineReason, declineNote: feedback.declineNote || '' }
+        : {})}
+  ),
   photoUrl: id => API + '/photos/' + encodeURIComponent(id),
   logoUrl: API + '/logo'
 };
