@@ -5,15 +5,15 @@ export function csrfCookie() {
   return item ? decodeURIComponent(item.slice('cg_portal_csrf='.length)) : '';
 }
 
-async function call(path, method = 'GET', data) {
+async function call(path, method = 'GET', data, signal) {
   const headers = {Accept:'application/json'};
   if (method !== 'GET') {
-    headers['Content-Type'] = 'application/json';
+    if (!(data instanceof FormData)) headers['Content-Type'] = 'application/json';
     headers['X-CG-CSRF'] = csrfCookie();
   }
   const result = await fetch(API + path, {
-    method,headers,credentials:'same-origin',cache:'no-store',
-    referrerPolicy:'no-referrer',body:data === undefined ? undefined : JSON.stringify(data)
+    method,headers,signal,credentials:'same-origin',cache:'no-store',
+    referrerPolicy:'no-referrer',body:data === undefined ? undefined : data instanceof FormData ? data : JSON.stringify(data)
   });
   const payload = await result.json().catch(() => ({}));
   if (!result.ok) {
@@ -24,9 +24,9 @@ async function call(path, method = 'GET', data) {
   return payload;
 }
 export const portalApi = {
-  branding: () => call('/branding'),
-  session: () => call('/session'),
-  exchange: token => call('/session','POST',{token}),
+  branding: signal => call('/branding','GET',undefined,signal),
+  session: signal => call('/session','GET',undefined,signal),
+  exchange: (token,signal) => call('/session','POST',{token},signal),
   logout: () => call('/logout','POST',{}),
   decideEstimate: (id, version, decision, reviewHash, feedback = {}) => call(
     '/estimates/' + encodeURIComponent(id) + '/decision', 'POST',
@@ -35,6 +35,14 @@ export const portalApi = {
         ? { declineReason: feedback.declineReason, declineNote: feedback.declineNote || '' }
         : {})}
   ),
+  uploadPhoto: (file, vehicleId) => {
+    const form = new FormData();
+    form.append('image', file);
+    form.append('vehicleId', vehicleId);
+    return call('/uploads','POST',form);
+  },
+  pendingPhotoUrl: id => API + '/uploads/' + encodeURIComponent(id),
   photoUrl: id => API + '/photos/' + encodeURIComponent(id),
+  invoicePdfUrl: id => API + '/invoices/' + encodeURIComponent(id) + '/pdf',
   logoUrl: API + '/logo'
 };

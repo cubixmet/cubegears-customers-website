@@ -10,6 +10,16 @@ export async function handlePortalRequest(request, segments) {
   const isLocal = process.env.NODE_ENV !== 'production' &&
     (['localhost', '127.0.0.1'].includes(hostname) ||
       /^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?\.localhost$/.test(hostname));
+  // Only the platform-owned, one-label workshop subdomain can reach the
+  // customer BFF. A signed arbitrary external hostname must never resolve.
+  const root = String(process.env.CUSTOMER_PORTAL_ROOT_DOMAIN || 'cubegears.com')
+    .trim().toLowerCase().replace(/^\.+|\.+$/g, '');
+  const label = root && hostname.endsWith('.' + root)
+    ? hostname.slice(0, -root.length - 1) : '';
+  const isWorkshopHost = /^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?$/.test(label);
+  if (!isLocal && !isWorkshopHost) {
+    return new Response(null, { status: 404 });
+  }
   const origin = request.headers.get('origin');
   if (request.method !== 'GET' && request.method !== 'POST') {
     return new Response(null, { status: 405, headers: { Allow: 'GET, POST' } });
@@ -40,10 +50,12 @@ export async function handlePortalRequest(request, segments) {
   } catch {
     return Response.json({ message: 'Backend URL must be HTTPS.' }, { status: 503 });
   }
+  const isInvoicePdf = request.method === 'GET' &&
+    path.length === 3 && path[0] === 'invoices' && path[2] === 'pdf';
   const timestamp = String(Math.floor(Date.now() / 1000));
   const signature = createHmac('sha256', secret).update(timestamp + ':' + host).digest('hex');
   const upstreamHeaders = new Headers({
-    Accept: request.headers.get('accept') || 'application/json',
+    Accept: isInvoicePdf ? 'application/pdf, application/json' : (request.headers.get('accept') || 'application/json'),
     'X-CG-Portal-Host': host,
     'X-CG-Portal-TS': timestamp,
     'X-CG-Portal-Sig': signature,
@@ -56,9 +68,26 @@ export async function handlePortalRequest(request, segments) {
   if (request.headers.has('x-cg-csrf')) upstreamHeaders.set('X-CG-CSRF', request.headers.get('x-cg-csrf'));
   let body;
   if (request.method === 'POST') {
-    body = await request.text();
-    if (Buffer.byteLength(body) > 8192) return new Response(null, { status: 413 });
-    upstreamHeaders.set('Content-Type', 'application/json');
+    const isUpload = path.length === 1 && path[0] === 'uploads';
+    if (isUpload) {
+      const type = request.headers.get('content-type') || '';
+      if (!/^multipart\/form-data;\s*boundary=[A-Za-z0-9'()+_,.\/-]{1,200}$/.test(type)) {
+        return Response.json({ message: 'Photo upload must use multipart form data.' }, { status: 415 });
+      }
+      const limit = 10 * 1024 * 1024 + 32768;
+      if (Number(request.headers.get('content-length') || 0) > limit) {
+        return Response.json({ message: 'Photo exceeds the 10 MB limit.' }, { status: 413 });
+      }
+      body = await request.arrayBuffer();
+      if (body.byteLength > limit) {
+        return Response.json({ message: 'Photo exceeds the 10 MB limit.' }, { status: 413 });
+      }
+      upstreamHeaders.set('Content-Type', type);
+    } else {
+      body = await request.text();
+      if (Buffer.byteLength(body) > 8192) return new Response(null, { status: 413 });
+      upstreamHeaders.set('Content-Type', 'application/json');
+    }
   }
   try {
     const upstream = await fetch(url, {
@@ -75,6 +104,9 @@ export async function handlePortalRequest(request, segments) {
       'X-Content-Type-Options': 'nosniff',
     });
     if (upstream.headers.has('content-type')) headers.set('Content-Type', upstream.headers.get('content-type'));
+    if (isInvoicePdf && upstream.ok && headers.get('Content-Type') === 'application/pdf') {
+      headers.set('Content-Disposition', upstream.headers.get('Content-Disposition') || 'attachment; filename="invoice.pdf"');
+    }
     for (const cookie of upstream.headers.getSetCookie?.() || []) {
       headers.append('Set-Cookie', cookie);
     }
